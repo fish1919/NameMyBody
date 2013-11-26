@@ -1,8 +1,29 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    padding: 50px;
+    font-family: 'Microsoft YaHei', "Microsoft YaHei UI", Arial, sans-serif;
+    font-size: medium;
 }
 
 a {
-  color: #00B7FF;
+    color: #00B7FF;
+}
+
+.name-candidate {
+    padding: 10px;
+    display: inline-block;
+    margin: 5px 20px 5px 10px;
+}
+
+.name-candidate-category {
+    font-weight: 900;
+}
+
+.name-candidate-text {
+    font-weight: 900;
+}
+
+.name-candidate-like {
+}
+
+.name-candidate-dislike {
 }
