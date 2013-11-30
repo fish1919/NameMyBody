@@ -1,3 +1,5 @@
+_ = require('underscore')
+should = require('should')
 mongoose = require('mongoose');
 Schema = mongoose.Schema;
 # Mongoose Schemas
@@ -7,18 +9,37 @@ NameSrcSchema = new mongoose.Schema(
         secondWordList: [String],
         thirdWordList: [String]
 )
-NameSrcSchema.methods.genNameCandidates = ()->
+NameSrcSchema.method("genNameCandidates", ()->
     nameCandidates = []
     for midWord in @secondWordList
         for thirdWord in @thirdWordList
             nameCandidates.push('冯' + midWord + thirdWord)
     return nameCandidates
+)
 
 NameCandidateSchema = new mongoose.Schema(
         name: String
         votes: Schema.Types.Mixed
 )
-
+NameCandidateSchema.method( "validateAndFormat", ()->
+    # validate
+    if (!@name or @name is '') then return false
+    # format
+    if (!@name[0] is "冯") then @name = "冯" + @name
+    return true
+)
+NameCandidateSchema.static( "saveIfNotExists", (entity, cb)->
+    should.exist(entity, "Parameter 'entity' cannot be null.")
+    should.exist(entity.name, "Parameter 'entity.name' cannot be null.")
+    
+    conditions = _.pick(entity, "name");
+    @findOne(conditions, (err, result)->
+        if (err) then cb(err, result)
+        else
+            if( !result) then entity.save(cb)
+            else cb(null, result)
+    )
+)
 
 exports.NameSrc = mongoose.model('name_src', NameSrcSchema);
 exports.NameCandidate = mongoose.model('name_candidate', NameCandidateSchema);

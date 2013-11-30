@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>给小孩选名字 - 系统控制台</title>
+
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link href="/plugins/jquery-ui-1.10.3/css/sunny/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="/plugins/jquery-2.0.3/jquery-2.0.3.min.js" type="text/javascript"></script>
+    <script src="/plugins/jquery-ui-1.10.3/js/jquery-ui-1.10.3.custom.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <h1>给小孩选名字 - 系统控制台</h1>
+    <div id="accordion">
+        <h3>系统初始化</h3>
+        <div>
+            <p class="operation-prompt">这个操作很<span class="dangerous">危险</span>，会清空所有记录！包括<span class="dangerous">所有名字和所有投票</span>，请慎用！</p>
+            <button id="btn-clearDB">确认执行</button>
+        </div>
+        <h3>名字自动生成</h3>
+        <div>
+            <p class="operation-prompt">根据指定的名字第二、三个字符，自动生成名字的排列组合</p>
+            <div class="operation-input-container">
+                <div>
+                    <label>名字的第二个字符（不需要分隔符）</label><input id="secondWordString" type="text" />
+                </div>
+                <div>
+                    <label>名字的第三个字符（不需要分隔符）</label><input id="thirdWordString" type="text" />
+                </div>
+            </div>
+            <button id="btn-autoGenNames">确认添加</button>
+        </div>
+        <h3>批量添加名字</h3>
+        <div>
+            <p class="operation-prompt">一次性添加多个名字，名字以逗号相隔，点击确定后添加</p>
+            <div class="operation-input-container">
+                <textarea id="batch-names" rows="4" class="width-90"></textarea>
+            </div>
+            <button id="btn-batchAddNames">确认添加</button>
+        </div>
+        <h3>批量删除名字</h3>
+        <div>
+            <p class="operation-prompt">输入名字含有的字符逗号分隔，可以是1~2个字符（比如：超然,炎）</p>
+            <div class="operation-input-container">
+                <input id="name-deletion-filters" class="width-90" type="text" />
+            </div>
+            <div id="filtered-name-list" class="name-list"></div>
+            <button id="btn-previewNamesTobeDel">预览</button>
+            <button id="btn-delPreviewedNames">删除（请先点击预览）</button>
+        </div>
+    </div>
+
+    <div id="dialog-succ" class="force-font" title="提示">
+        <p>操作成功！</p>
+    </div>
+
+    <div id="dialog-fail" class="force-font" title="提示">
+        <p><span class="dangerous">操作失败！</span></p>
+    </div>
+
+    <script type="text/javascript">
+
+        function showSucc() { $("#dialog-succ").dialog("open"); };
+        function showFail() { $("#dialog-fail").dialog("open"); };
+        function clearNames() { $("#filtered-name-list").children().remove(); }
+        function listNames(names) {
+            var nameList = $("#filtered-name-list");
+            clearNames();
+            for (var i in names) {
+                console.log(names[i]);
+                $("<div>").append(names[i].name).appendTo(nameList);
+            }
+        }
+
+
+        $(document).ready(function () {
+            $("#accordion").accordion({ collapsible: true });
+            $("button").button();
+            $("#dialog-succ, #dialog-fail").dialog({
+                autoOpen: false, modal: true, closeOnEscape: true,
+                show: { effect: "blind", duration: 500 },
+                hide: { effect: "explode", duration: 1500 }
+            });
+
+
+            $("#btn-clearDB").click(function () {
+                $.post('/admin/clearDB')
+                  .done(function (data) { showSucc(); })
+                  .fail(function (data) { showFail(); })
+            });
+
+            $("#btn-autoGenNames").click(function () {
+                $.post('/admin/autoGenNames', {
+                    secondWordString: $("#secondWordString").val(),
+                    thirdWordString: $("#thirdWordString").val()
+                })
+                  .done(function (data) { showSucc(); })
+                  .fail(function (data) { showFail(); })
+            });
+
+            $("#btn-batchAddNames").click(function () {
+                $.post('/admin/batchAddNames', {
+                    names: $("#batch-names").val()
+                })
+                  .done(function (data) { showSucc(); })
+                  .fail(function (data) { showFail(); })
+            });
+
+            $("#btn-previewNamesTobeDel").click(function () {
+                $.post('/admin/queryFilteredNames', {
+                    filters: $("#name-deletion-filters").val()
+                })
+                  .done(function (data) { listNames(data); })
+                  .fail(function (data) { clearNames(); showFail(); })
+            });
+
+            $("#btn-delPreviewedNames").click(function () {
+                $.post('/admin/delPreviewedNames')
+                  .done(function (data) { showSucc(); })
+                  .fail(function (data) { showFail(); })
+            });
+
+        });
+    </script>
+</body>
+</html>

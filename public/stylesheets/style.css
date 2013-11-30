@@ -1,4 +1,4 @@
-body {
+body, #accordion, .force-font {
     padding: 50px;
     font-family: 'Microsoft YaHei', "Microsoft YaHei UI", Arial, sans-serif;
     font-size: medium;
@@ -26,4 +26,20 @@ a {
 }
 
 .name-candidate-dislike {
+}
+
+.width-90 {
+    width: 90%;
+}
+
+.operation-prompt {
+    font-weight: 700;
+}
+
+.operation-input-container{
+    margin: 15px;
+}
+
+.dangerous {
+    color: red;
 }

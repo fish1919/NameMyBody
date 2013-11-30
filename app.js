@@ -38,6 +38,8 @@
 
   (new (require('./lib/routes/NameRoute'))(app)).addRequestHandlers();
 
+  (new (require('./lib/routes/AdminRoute'))(app)).addRequestHandlers();
+
   http.createServer(app).listen(app.get('port'), function() {
     return console.log('Express server listening on port ' + app.get('port'));
   });
