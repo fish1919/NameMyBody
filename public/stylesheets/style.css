@@ -8,26 +8,6 @@ a {
     color: #00B7FF;
 }
 
-.name-candidate {
-    padding: 10px;
-    display: inline-block;
-    margin: 5px 20px 5px 10px;
-}
-
-.name-candidate-category {
-    font-weight: 900;
-}
-
-.name-candidate-text {
-    font-weight: 900;
-}
-
-.name-candidate-like {
-}
-
-.name-candidate-dislike {
-}
-
 .width-90 {
     width: 90%;
 }

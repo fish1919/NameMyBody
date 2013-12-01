@@ -15,9 +15,9 @@ module.exports = class AdminRoute
         @app.post('/admin/clearDB', _.bind(@handleAjaxClearDB, @))
         @app.post('/admin/autoGenNames', _.bind(@handleAjaxAutoGenNames, @))
         @app.post('/admin/batchAddNames', _.bind(@handleAjaxBatchAddNames, @))
-        @app.post('/admin/queryFilteredNames', _.bind(@handleQueryFilteredNames, @))
-        @app.post('/admin/delPreviewedNames', _.bind(@handleAjaxClearDB, @))
-        #@app.get('/admin/sysInit', _.bind(@handleSysInit, @)
+        @app.post('/admin/queryFilteredNames', _.bind(@handleAjaxQueryFilteredNames, @))
+        @app.post('/admin/delPreviewedNames', _.bind(@handleAjaxDeleteFilteredNames, @))
+        @app.post('/admin/delAName', _.bind(@handleAjaxDeleteAName, @))
 
     handleIndex: (req, res)-> res.render("page_admin_index")
 
@@ -46,7 +46,7 @@ module.exports = class AdminRoute
          )
 
 
-     handleQueryFilteredNames: (req, res)->
+     handleAjaxQueryFilteredNames: (req, res)->
         {filters} = req.body
         should.exist(filters, "Query parameter 'req.body.filters' cannot be null")
 
@@ -56,9 +56,33 @@ module.exports = class AdminRoute
             conditions = for filter in filters.split(",") when filter isnt ''
                 {name: new RegExp("#{filter}")}
        
-        NameCandidate.find({ "$or": conditions }, (err, entities)->
+        NameCandidate.find({ "$or": conditions }, {}, {sort: {name: 1}}, (err, entities)->
             if (err) then res.json(500)
             else res.json(200, entities)
+        )
+
+    handleAjaxDeleteFilteredNames: (req, res)->
+        {filters} = req.body
+        should.exist(filters, "Query parameter 'req.body.filters' cannot be null")
+
+        # Empty filters return all the results
+        if filters is '' then conditions = [true]
+        else
+            conditions = for filter in filters.split(",") when filter isnt ''
+                {name: new RegExp("#{filter}")}
+       
+        NameCandidate.remove({ "$or": conditions }, (err)->
+            if (err) then res.json(500)
+            else res.json(200)
+        )
+
+    handleAjaxDeleteAName: (req, res)->
+        {id} = req.body
+        should.exist(id, "Query parameter 'req.body.id' cannot be null")
+
+        NameCandidate.findOneAndRemove({ "_id": id }, (err)->
+            if (err) then res.json(500)
+            else res.json(200)
         )
 
     __dropTables: (cb)->
@@ -104,6 +128,7 @@ module.exports = class AdminRoute
             else
                 callback(null)
 
-        async.each(names.split(","), iterator, cb)
+        # Use serise to avoid duplications
+        async.eachSeries(names.split(","), iterator, cb)
 
             
